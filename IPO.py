@@ -16,6 +16,8 @@ from selenium.webdriver.chrome.options import Options #for headless
 from selenium.webdriver.common.by import By
 import os #for directory
 import xlwings as xw
+from GoogleHomemadeAPI import Create_Service
+import win32com.client as win32
 
 def setHeadless(mainPAth,headless = False):
     chromeOption = Options()
@@ -121,7 +123,33 @@ def updateDB(mydir):
     app = xw.apps.active 
     app.quit()
 
+def updateGoogleSheet(mydir):
+    xlApp = win32.Dispatch('Excel.Application')
+    wb = xlApp.Workbooks.Open(mydir+"/database.xlsm")
+    ws = wb.Worksheets('DB')
+    rngData = ws.Range('A1').CurrentRegion()
+    
+    # Google Sheet Id
+    gsheet_id = '1XH-OJBcOr7GlvGu9yFnLU4blGSNnpWTRnYdIjhKvjf8'
+    CLIENT_SECRET_FILE = 'client_secret.json'
+    API_SERVICE_NAME = 'sheets'
+    API_VERSION = 'v4'
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+    service = Create_Service(CLIENT_SECRET_FILE, API_SERVICE_NAME, API_VERSION, SCOPES)
+    
+    response = service.spreadsheets().values().append(
+        spreadsheetId=gsheet_id,
+        valueInputOption='RAW',
+        range='DB!A1',
+        body=dict(
+            majorDimension='ROWS',
+            values=rngData
+        )
+    ).execute()
+
+
 if __name__=="__main__":
     mydir = os.getcwd()
     downloadIPO(mydir,getLatest())
     updateDB(mydir)
+    updateGoogleSheet(mydir)
