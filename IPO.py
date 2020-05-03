@@ -18,6 +18,7 @@ import os #for directory
 import xlwings as xw
 from GoogleHomemadeAPI import Create_Service
 import win32com.client as win32
+import time
 
 def setHeadless(mainPAth,headless = False):
     chromeOption = Options()
@@ -137,6 +138,13 @@ def updateGoogleSheet(mydir):
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
     service = Create_Service(CLIENT_SECRET_FILE, API_SERVICE_NAME, API_VERSION, SCOPES)
     
+    rangeAll = '{0}!A1:Z'.format("DB")
+    response = service.spreadsheets().values().clear(
+            spreadsheetId=gsheet_id,
+            range=rangeAll,
+            body={}
+            ).execute()
+    
     response = service.spreadsheets().values().append(
         spreadsheetId=gsheet_id,
         valueInputOption='RAW',
@@ -146,10 +154,12 @@ def updateGoogleSheet(mydir):
             values=rngData
         )
     ).execute()
+    wb.Close(False)
 
 
 if __name__=="__main__":
     mydir = os.getcwd()
     downloadIPO(mydir,getLatest())
     updateDB(mydir)
+    time.sleep(20)
     updateGoogleSheet(mydir)
