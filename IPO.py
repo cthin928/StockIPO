@@ -38,7 +38,9 @@ def xpathTable(i,j):
     return '/html/body/center/table/tbody/tr['+str(i)+']/td['+str(j)+']'
 
 def downloadIPO(mydir,today):
-    if isinstance(today,str): today = datetime.datetime.strptime(today,"%Y-%m-%d")
+    if isinstance(today,str): 
+        if today != "":
+            today = datetime.datetime.strptime(today,"%Y-%m-%d")
     
     ipo = "http://www.ipohk.com.cn/"
     
@@ -95,11 +97,10 @@ def downloadIPO(mydir,today):
     
     driver.quit()
     df.to_csv(mydir+"\pythonOutput.csv" ,encoding='utf_8_sig')
+    if today == "": today = datetime.datetime.now()
     log.write("[{}] Finished program with date {}.\n".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),today.strftime('%Y-%m-%d')))
     log.close()
 
-#downloadIPO(os.getcwd(),datetime.datetime.now())
-#downloadIPO(os.getcwd(),"2020-04-01")
 def getLatest(file = "log.txt"):
     try:
         log = open("log.txt","r")
